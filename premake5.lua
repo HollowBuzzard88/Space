@@ -16,7 +16,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
 project "Space"
     location "Space"
-    kind "ConsoleApp"
+    kind "WindowedApp"
     language "C++"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
@@ -40,9 +40,12 @@ project "Space"
     }
 
     filter "system:windows"
-        cppdialect "C++17"
+        defines "SP_PLATFORM_WINDOWS"
+        cppdialect "C++23"
         staticruntime "On"
         systemversion "latest"
+
+        entrypoint "mainCRTStartup"
 
         buildoptions
         {
@@ -52,6 +55,10 @@ project "Space"
         defines
         {
         }
+    filter "system:linux"
+        defines "SP_PLATFORM_LINUX"
+    filter "system:macosx"
+        defines "SP_PLATFORM_MAC"
 
     filter "configurations:Debug"
         staticruntime "off"
