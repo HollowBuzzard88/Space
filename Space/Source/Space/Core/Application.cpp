@@ -1,4 +1,6 @@
 #include "Space/Core/Application.h"
+
+// Include Entrypoint so that C++ recognizes it
 #include "Entrypoint.h"
 
 namespace Space

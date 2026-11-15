@@ -83,3 +83,5 @@ c_cpp_properties.json
 *.slnx
 *.code-workspace
 GenerateProjects.bat
+
+/Space/Source/Space/Rendering/
