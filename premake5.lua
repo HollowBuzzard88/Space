@@ -14,6 +14,12 @@ workspace "Space"
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+-- Include directories relative to root folder (solution directory)
+IncludeDir = {}
+IncludeDir["Glad"] = "Space/vendor/Glad/include"
+
+include "Space/vendor/Glad"
+
 project "Space"
     location "Space"
     kind "WindowedApp"
@@ -30,13 +36,16 @@ project "Space"
 
     includedirs
     {
-        "%{prj.name}/Source"
+        "%{prj.name}/Source",
+        "%{IncludeDir.Glad}"
     }
 
     links
     {
         "opengl32.lib",
-        "dwmapi.lib"
+        "dwmapi.lib",
+        
+        "Glad"
     }
 
     filter "system:windows"

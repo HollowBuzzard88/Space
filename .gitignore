@@ -73,8 +73,8 @@ Testing/
 .vs
 c_cpp_properties.json
 
-/bin/
-/bin-int/
+bin
+bin-int
 
 *.vcxproj
 *.user
