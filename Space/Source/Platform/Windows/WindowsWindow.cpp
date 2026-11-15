@@ -39,7 +39,11 @@ namespace Space
                 m_ShouldClose = true;
 
                 WindowCloseEvent e;
-                //WindowsWindow::m_Data.EventCallback(e);
+
+                if (WindowsWindow::m_Data.EventCallback)
+                {
+                    WindowsWindow::m_Data.EventCallback(e);
+                }
 
                 return 0;
             }
@@ -55,7 +59,10 @@ namespace Space
                 RECT newSize = static_cast<RECT>(lParam);
                 WindowResizeEvent e(newSize.right - newSize.left, newSize.bottom - newSize.top);
 
-                //WindowsWindow::m_Data.EventCallback(e);
+                if (WindowsWindow::m_Data.EventCallback)
+                {
+                    WindowsWindow::m_Data.EventCallback(e);
+                }
 
                 return true;
             }
@@ -67,8 +74,13 @@ namespace Space
 
                 WindowsWindow::wndMousePos = std::pair<float, float>(xPos, yPos);
 
+
                 MouseMovedEvent e(xPos, yPos);
-                //WindowsWindow::m_Data.EventCallback(e);
+
+                if (WindowsWindow::m_Data.EventCallback)
+                {
+                    WindowsWindow::m_Data.EventCallback(e);
+                }
 
                 return 0;
             }
@@ -78,22 +90,52 @@ namespace Space
             case WM_XBUTTONDOWN:
             {
                 if (GET_XBUTTON_WPARAM(wParam) == XBUTTON1)         // 4th mouse button
-                    wndMouseButtons[(uint8_t)MouseButtons::BUTTON_4] = true;
+                {
+                    int buttonIndex = (uint8_t)MouseButtons::BUTTON_4;
+
+                    MouseButtonPressedEvent e(buttonIndex);
+                    WindowsWindow::m_Data.EventCallback(e);
+
+                    wndMouseButtons[buttonIndex] = true;
+                }
                 else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON2)    // 5th mouse button
-                    wndMouseButtons[(uint8_t)MouseButtons::BUTTON_5] = true;
+                {
+                    int buttonIndex = (uint8_t)MouseButtons::BUTTON_5;
+
+                    MouseButtonPressedEvent e(buttonIndex);
+                    WindowsWindow::m_Data.EventCallback(e);
+
+                    wndMouseButtons[buttonIndex] = true;
+                }
                 else
                     //TODO: Throw Error
+                
 
                 return true;
             }
             case WM_XBUTTONUP:
             {
                 if (GET_XBUTTON_WPARAM(wParam) == XBUTTON1)         // 4th mouse button
-                    wndMouseButtons[(uint8_t)MouseButtons::BUTTON_4] = false;
+                {
+                    int buttonIndex = (uint8_t)MouseButtons::BUTTON_4;
+
+                    MouseButtonPressedEvent e(buttonIndex);
+                    WindowsWindow::m_Data.EventCallback(e);
+
+                    wndMouseButtons[buttonIndex] = false;
+                }
                 else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON2)    // 5th mouse button
-                    wndMouseButtons[(uint8_t)MouseButtons::BUTTON_5] = false;
+                {
+                    int buttonIndex = (uint8_t)MouseButtons::BUTTON_5;
+
+                    MouseButtonPressedEvent e(buttonIndex);
+                    WindowsWindow::m_Data.EventCallback(e);
+
+                    wndMouseButtons[buttonIndex] = false;
+                }
                 else
                     //TODO: Throw Error
+                
 
                 return true;
             }
@@ -103,12 +145,22 @@ namespace Space
             {
             case WM_LBUTTONDOWN:
             {
-                wndMouseButtons[(uint8_t)MouseButtons::LEFT] = true;
+                int buttonIndex = (uint8_t)MouseButtons::LEFT;
+
+                MouseButtonPressedEvent e(buttonIndex);
+                WindowsWindow::m_Data.EventCallback(e);
+
+                wndMouseButtons[buttonIndex] = true;
                 return 0;
             }
             case WM_LBUTTONUP:
             {
-                wndMouseButtons[(uint8_t)MouseButtons::LEFT] = false;
+                int buttonIndex = (uint8_t)MouseButtons::LEFT;
+
+                MouseButtonPressedEvent e(buttonIndex);
+                WindowsWindow::m_Data.EventCallback(e);
+
+                wndMouseButtons[buttonIndex] = false;
                 return 0;
             }
             }
@@ -117,12 +169,22 @@ namespace Space
             {
             case WM_RBUTTONDOWN:
             {
-                wndMouseButtons[(uint8_t)MouseButtons::RIGHT] = true;
+                int buttonIndex = (uint8_t)MouseButtons::RIGHT;
+
+                MouseButtonPressedEvent e(buttonIndex);
+                WindowsWindow::m_Data.EventCallback(e);
+
+                wndMouseButtons[buttonIndex] = true;
                 return 0;
             }
             case WM_RBUTTONUP:
             {
-                wndMouseButtons[(uint8_t)MouseButtons::RIGHT] = false;
+                int buttonIndex = (uint8_t)MouseButtons::RIGHT;
+
+                MouseButtonPressedEvent e(buttonIndex);
+                WindowsWindow::m_Data.EventCallback(e);
+
+                wndMouseButtons[buttonIndex] = false;
                 return 0;
             }
             }
@@ -180,6 +242,34 @@ namespace Space
 
         ShowWindow(m_Window, SW_SHOW);
     }
+
+    //TODO: Maybe use some of the GLFW procedure to destroying a window:
+    /*
+   *void _glfwDestroyWindowWin32(_GLFWwindow* window)
+   *{
+   *    if (window->monitor)
+   *        releaseMonitor(window);
+
+   *    if (window->context.destroy)
+   *        window->context.destroy(window);
+
+   *    if (_glfw.win32.disabledCursorWindow == window)
+   *        _glfw.win32.disabledCursorWindow = NULL;
+
+   *    if (window->win32.handle)
+   *    {
+   *        RemovePropW(window->win32.handle, L"GLFW");
+   *        DestroyWindow(window->win32.handle);
+   *        window->win32.handle = NULL;
+   *    }
+
+   *    if (window->win32.bigIcon)
+   *        DestroyIcon(window->win32.bigIcon);
+
+   *    if (window->win32.smallIcon)
+   *        DestroyIcon(window->win32.smallIcon);
+   *}
+    */
 
     void WindowsWindow::Shutdown()
     {
