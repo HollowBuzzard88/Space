@@ -1,4 +1,6 @@
+
 #include "Space/Core/Application.h"
+#include <glad/glad.h>
 
 // Include Entrypoint so that C++ recognizes it
 #include "Entrypoint.h"
@@ -31,7 +33,8 @@ namespace Space
     {
         while (m_Running)
         {
-            //TODO: OpenGL rendering
+            glClearColor(0.87f, 0.56f, 0.67f, 1.0f);
+            glClear(GL_COLOR_BUFFER_BIT);
 
             //TODO: Get an update loop going
 

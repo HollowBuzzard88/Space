@@ -1,5 +1,13 @@
 #pragma once
 
+#include <glad/glad.h>
+
+#ifdef SP_PLATFORM_WINDOWS
+    #define WIN32_LEAN_AND_MEAN
+    #define NOMINMAX
+    #include <windows.h>
+#endif
+
 #include "Space/Core/Core.h"
 #include "Space/Core/Window.h"
 
@@ -44,9 +52,10 @@ namespace Space
 
             EventCallbackFn EventCallback;
         };
-
+        
+        static HDC m_DeviceContext;
         static WindowData m_Data;
-    
         static bool m_ShouldClose;
+        static bool m_GLInitialized;
     };
 }

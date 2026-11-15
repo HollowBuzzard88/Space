@@ -9,6 +9,7 @@ project "Glad"
     {
         "include/glad/glad.h",
         "include/KHR/khrplatform.h",
+        "include/KHR/wglext.h",
 
         "src/glad.c"
     }

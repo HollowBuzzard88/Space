@@ -1,14 +1,12 @@
 #pragma once
 
-#ifdef SP_PLATFORM_WINDOWS
-    #define WIN32_LEAN_AND_MEAN
-    #define NOMINMAX
-    #include <windows.h>
+/* #ifdef SP_PLATFORM_WINDOWS
 #elifdef SP_PLATFORM_MAC
     #error No iOS implementation yet!
 #elifdef SP_PLATFORM_LINUX
     #error No Linux implementation yet!
 #endif
+ */
 
 #include <iostream>
 #include <memory>
