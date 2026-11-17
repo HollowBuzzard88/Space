@@ -28,6 +28,9 @@ project "Space"
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
+	pchheader "SP_pch.h"
+	pchsource "%{prj.name}/Source/SP_pch.cpp"
+
     files
     {
         "%{prj.name}/Source/**.h",

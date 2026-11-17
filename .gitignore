@@ -83,5 +83,3 @@ bin-int
 *.slnx
 *.code-workspace
 GenerateProjects.bat
-
-/Space/Source/Space/Rendering/

@@ -1,6 +1,8 @@
-
+#include "SP_pch.h"
 #include "Space/Core/Application.h"
 #include <glad/glad.h>
+
+#include "Space/Rendering/Renderer.h"
 
 // Include Entrypoint so that C++ recognizes it
 #include "Entrypoint.h"
@@ -31,10 +33,14 @@ namespace Space
 
     void Application::Run()
     {
+        Renderer::Init();
+
         while (m_Running)
         {
             glClearColor(0.87f, 0.56f, 0.67f, 1.0f);
             glClear(GL_COLOR_BUFFER_BIT);
+
+            Renderer::Render();
 
             //TODO: Get an update loop going
 

@@ -1,3 +1,4 @@
+#include "SP_pch.h"
 #include "Platform/Windows/WindowsWindow.h"
 
 #include <windowsx.h>
@@ -7,6 +8,8 @@
 #include "Space/Events/MouseEvent.h"
 
 #include "Space/Core/MouseCodes.h"
+
+#include "Space/Rendering/Renderer.h"
 
 namespace Space
 {
@@ -100,10 +103,10 @@ namespace Space
                 // Render a frame immideately to minimize ugly black borders
                 if (m_GLInitialized)
                 {
-                    //TODO: Replace this with a call to the renderer
-
                     glClearColor(0.87f, 0.56f, 0.67f, 1.0f);
                     glClear(GL_COLOR_BUFFER_BIT);
+
+                    Renderer::Render();
 
                     SwapBuffers(m_DeviceContext);
                 }
