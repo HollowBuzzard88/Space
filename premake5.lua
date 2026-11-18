@@ -17,6 +17,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 -- Include directories relative to root folder (solution directory)
 IncludeDir = {}
 IncludeDir["Glad"] = "Space/vendor/Glad/include"
+IncludeDir["glm"] = "Space/vendor/glm"
 
 include "Space/vendor/Glad"
 
@@ -40,7 +41,8 @@ project "Space"
     includedirs
     {
         "%{prj.name}/Source",
-        "%{IncludeDir.Glad}"
+        "%{IncludeDir.Glad}",
+        "%{IncludeDir.glm}"
     }
 
     links

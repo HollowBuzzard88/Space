@@ -3,7 +3,9 @@
 
 #include "glad/glad.h"
 
-#include "Space/Planet/Planet.h"
+#include "Space/Scene/Planet.h"
+
+#include "Space/Core/AssetManager.h"
 
 namespace Space
 {
@@ -11,49 +13,16 @@ namespace Space
 
     unsigned int Renderer::VBO;
     unsigned int Renderer::VAO;
-    unsigned int Renderer::ShaderProgram;
+    Shader Renderer::ShaderProgram;
     std::vector<float> Renderer::verts;
 
     void Renderer::Init()
     {
-        unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-        glCompileShader(vertexShader);
-        
-        int success;
-        char infoLog[512];
-        glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-        if (!success)
-        {
-            glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-        }
+        ShaderProgram = Shader(
+            AssetManager::GetAbsolutePath("Shaders/vertex.vert"),
+            AssetManager::GetAbsolutePath("Shaders/fragment.frag")
+        );
 
-        unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-        glCompileShader(fragmentShader);
-        // check for shader compile errors
-        glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-        if (!success)
-        {
-            glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-        }
-        
-        ShaderProgram = glCreateProgram();
-        glAttachShader(ShaderProgram, vertexShader);
-        glAttachShader(ShaderProgram, fragmentShader);
-        glLinkProgram(ShaderProgram);
-        // check for linking errors
-        glGetProgramiv(ShaderProgram, GL_LINK_STATUS, &success);
-        if (!success) {
-            glGetProgramInfoLog(ShaderProgram, 512, NULL, infoLog);
-            std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-        }
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-
-        
         verts = Planet::GeneratePlanet();
 
         glGenVertexArrays(1, &VAO);
@@ -62,7 +31,7 @@ namespace Space
         glBindVertexArray(VAO);
 
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(verts), verts.data(), GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_STATIC_DRAW);
 
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
@@ -88,10 +57,8 @@ namespace Space
 
     void Renderer::Render()
     {
-        std::cout << "Render" << std::endl;
-
-        glUseProgram(ShaderProgram);
+        ShaderProgram.Activate();
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0.0f, verts.size() / 3.0f);
     }
 }
