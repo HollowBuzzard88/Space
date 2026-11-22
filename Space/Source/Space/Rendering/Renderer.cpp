@@ -1,64 +1,94 @@
 #include "SP_pch.h"
 #include "Space/Rendering/Renderer.h"
 
-#include "glad/glad.h"
-
-#include "Space/Scene/Planet.h"
-
-#include "Space/Core/AssetManager.h"
-
 namespace Space
 {
-    Renderer::API Renderer::s_API = Renderer::API::OpenGL;
-
-    unsigned int Renderer::VBO;
-    unsigned int Renderer::VAO;
-    Shader Renderer::ShaderProgram;
-    std::vector<float> Renderer::verts;
-
     void Renderer::Init()
     {
-        ShaderProgram = Shader(
-            AssetManager::GetAbsolutePath("Shaders/vertex.vert"),
-            AssetManager::GetAbsolutePath("Shaders/fragment.frag")
-        );
+        m_GraphicsAPI = GraphicsAPI::Create();
+        m_GraphicsAPI->Init();
 
-        verts = Planet::GeneratePlanet();
+        m_DrawQueue.reserve(1000);
+    }
 
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        
-        glBindVertexArray(VAO);
+    void Renderer::BeginScene(const glm::mat4& viewProjectionMatrix)
+    {
+        m_ViewProjectionMatrix = viewProjectionMatrix;
+        m_DrawQueue.clear();
 
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(float), verts.data(), GL_STATIC_DRAW);
+        begunScene = true;
+    }
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
+    void Renderer::Submit(std::shared_ptr<Shader>& shader, std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
+    {
+        if (!begunScene) return; //TODO: Add assertion/error
 
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindVertexArray(0);
+        RenderCommand cmd;
+        cmd.shader = shader.get();
+        //cmd.material = material;
+        cmd.vertexArray = vertexArray.get();
+        cmd.transform = transform;
+
+        uint64_t key = static_cast<uint64_t>(shader->GetID()) << 32;
+        cmd.sortKey = key;
+
+        m_DrawQueue.push_back(cmd);
+    }
+
+    void Renderer::EndScene()
+    {
+        if (!begunScene) return; //TODO: Add assertion/error
+
+        SortQueue();
+        Flush();
+
+        begunScene = false;
+    }
+
+    void Renderer::SortQueue()
+    {
+        // Group identical Shader IDs together
+        std::sort(m_DrawQueue.begin(), m_DrawQueue.end(),
+                [](const RenderCommand& a, const RenderCommand& b)
+                {
+                    return a.sortKey < b.sortKey;
+                });
+    }
+
+    void Renderer::Flush()
+    {
+        m_GraphicsAPI->SetClearColor({0.92f, 0.25f, 0.2f, 1.0f});
+        m_GraphicsAPI->Clear();
+
+        Shader* lastShader = nullptr;
+
+        for (const auto& cmd : m_DrawQueue)
+        {
+            // Only bind the shader if it changed from the previous command
+            if (cmd.shader != lastShader)
+            {
+                cmd.shader->Bind();
+                cmd.shader->SetMat4("u_ViewProj", m_ViewProjectionMatrix);
+                lastShader = cmd.shader;
+            }
+
+            //cmd.material->Bind();
+            cmd.shader->SetMat4("u_Transform", cmd.transform);
+
+            cmd.vertexArray->Bind();
+            m_GraphicsAPI->DrawIndexed(cmd.vertexArray);
+        }
+    }
+
+    void Renderer::OnWindowResize(uint32_t width, uint32_t height)
+    {
+        if (width == 0 || height == 0) return;
+
+        m_GraphicsAPI->SetViewport(0, 0, width, height);
     }
 
     void Renderer::Shutdown()
     {
 
-    }
-
-    void Renderer::OnWindowResize(uint32_t width, uint32_t height)
-    {
-
-    }
-
-    void Renderer::Draw(Mesh element)
-    {
-
-    }
-
-    void Renderer::Render()
-    {
-        ShaderProgram.Activate();
-        glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0.0f, verts.size() / 3.0f);
     }
 }

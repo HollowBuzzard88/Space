@@ -1,11 +1,10 @@
 #include "SP_pch.h"
 #include "Space/Core/Application.h"
-#include <glad/glad.h>
-
-#include "Space/Rendering/Renderer.h"
 
 // Include Entrypoint so that C++ recognizes it
 #include "Entrypoint.h"
+
+#include <glm/gtc/matrix_transform.hpp>
 
 namespace Space
 {
@@ -17,6 +16,8 @@ namespace Space
 
         m_Window = std::unique_ptr<Window>(Window::Create());
         m_Window->SetEventCallback(SP_BIND_EVENT_FN(Application::OnEvent));
+
+        m_Renderer = std::make_unique<Renderer>();
     }
 
     Application::~Application()
@@ -27,23 +28,24 @@ namespace Space
     {
         EventDispatcher dispatcher(e);
         dispatcher.Dispatch<WindowCloseEvent>(SP_BIND_EVENT_FN(Application::OnWindowClose));
+        dispatcher.Dispatch<WindowResizeEvent>(SP_BIND_EVENT_FN(Application::OnWindowResize));
 
         //TODO: Figure out how to handle events. Either layers like in TheCherno's version or different
     }
 
     void Application::Run()
     {
-        Renderer::Init();
+        m_Renderer->Init();
 
         while (m_Running)
         {
-            glClearColor(0.87f, 0.56f, 0.67f, 1.0f);
-            glClear(GL_COLOR_BUFFER_BIT);
+            glm::mat4 projection = glm::ortho(0.0f, (float)m_Window->GetWidth(), 0.0f, (float)m_Window->GetHeight(), -1.0f, 1.0f);
+            glm::mat4 view = glm::mat4(1.0f);
+            m_Renderer->BeginScene(projection * view);
 
-            Renderer::Render();
+            
 
-            //TODO: Get an update loop going
-
+            m_Renderer->EndScene();
             m_Window->OnUpdate();
         }
     }
@@ -51,6 +53,12 @@ namespace Space
     bool Application::OnWindowClose(WindowCloseEvent& e)
     {
         m_Running = false;
+        return true;
+    }
+
+    bool Application::OnWindowResize(WindowResizeEvent &e)
+    {
+        m_Renderer->OnWindowResize(e.GetWidth(), e.GetHeight());
         return true;
     }
 }

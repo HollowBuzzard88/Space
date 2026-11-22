@@ -8,6 +8,7 @@
 #include "Space/Events/MouseEvent.h"
 
 #include "Space/Core/MouseCodes.h"
+#include "Space/Core/Application.h"
 
 #include "Space/Rendering/Renderer.h"
 
@@ -98,17 +99,6 @@ namespace Space
                 if (WindowsWindow::m_Data.EventCallback)
                 {
                     WindowsWindow::m_Data.EventCallback(e);
-                }
-                
-                // Render a frame immideately to minimize ugly black borders
-                if (m_GLInitialized)
-                {
-                    glClearColor(0.87f, 0.56f, 0.67f, 1.0f);
-                    glClear(GL_COLOR_BUFFER_BIT);
-
-                    Renderer::Render();
-
-                    SwapBuffers(m_DeviceContext);
                 }
 
                 return 0;

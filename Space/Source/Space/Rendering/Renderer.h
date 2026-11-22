@@ -1,34 +1,35 @@
 #pragma once
 
-#include "Space/Rendering/Mesh.h"
 #include "Space/Rendering/Shader.h"
+#include "Space/Rendering/VertexArray.h"
+#include "Space/Rendering/RenderCommand.h"
+#include "Space/Rendering/GraphicsAPI.h"
 
 namespace Space
 {
     class Renderer
     {
     public:
-        enum class API
-        {
-            None = 0, OpenGL = 1
-        };
-    public:
-        static void Init();
-        static void Shutdown();
+        Renderer() = default;
 
-        static void OnWindowResize(uint32_t width, uint32_t height);
+        void Init();
+        void Shutdown();
+
+        void OnWindowResize(uint32_t width, uint32_t height);
+
+        void BeginScene(const glm::mat4& viewProjectionMatrix);
         
-        static void Draw(Mesh element); // Add elements to the renderQueue
-        static void Render();
+        void Submit(std::shared_ptr<Shader>& shader, std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform);
 
-        static API GetAPI() { return s_API; }
+        void EndScene();
     private:
-        static std::vector<Mesh> m_drawQueue;
-        static API s_API;
+        void SortQueue();
+        void Flush();
+    private:
+        GraphicsAPI* m_GraphicsAPI = nullptr;
+        std::vector<RenderCommand> m_DrawQueue;
+        glm::mat4 m_ViewProjectionMatrix;
 
-        static unsigned int VBO, VAO;
-        static std::vector<float> verts;
-
-        static Shader ShaderProgram;
+        bool begunScene = false;
     };
 }
