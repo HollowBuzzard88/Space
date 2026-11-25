@@ -20,6 +20,22 @@ namespace Space
         }
     };
 
+    // Documentation for all windows cursors: https://learn.microsoft.com/en-us/windows/win32/menurc/about-cursors
+    enum class Cursor : uint8_t
+    {
+        Default = 0, Arrow = 1, Text,
+        AppStarting,
+        Hand,
+        HelpSelect, LocationSelect, PersonSelect,
+        Unavailable,
+        Busy,
+        Cross,
+        UpArrow,
+
+        Move,
+        SizeVert, SizeHoriz, SizeDiagRight, SizeDiagLeft
+    };
+
     // Interface representing a desktop system based Window
     class Window
     {
@@ -29,6 +45,8 @@ namespace Space
         virtual ~Window() {}
 
         virtual void OnUpdate() = 0;
+
+        virtual void SetWindowCursor(Cursor cursor) = 0;
 
         virtual unsigned int GetWidth() const = 0;
         virtual unsigned int GetHeight() const = 0;

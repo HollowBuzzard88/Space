@@ -19,15 +19,20 @@ namespace Space
         begunScene = true;
     }
 
-    void Renderer::Submit(std::shared_ptr<Shader>& shader, std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform)
+    void Renderer::Submit(std::shared_ptr<Shader>& shader, std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform, const glm::vec4& color)
     {
-        if (!begunScene) return; //TODO: Add assertion/error
+        if (!begunScene)
+        {
+            SP_ERROR("Unable to submit render call before 'BeginScene()' has been called.");
+            return;
+        }
 
         RenderCommand cmd;
         cmd.shader = shader.get();
         //cmd.material = material;
         cmd.vertexArray = vertexArray.get();
         cmd.transform = transform;
+        cmd.color = color;
 
         uint64_t key = static_cast<uint64_t>(shader->GetID()) << 32;
         cmd.sortKey = key;
@@ -37,7 +42,11 @@ namespace Space
 
     void Renderer::EndScene()
     {
-        if (!begunScene) return; //TODO: Add assertion/error
+        if (!begunScene)
+        {
+            SP_ERROR("Unable to 'EndScene()' before 'BeginScene()' has been called.");
+            return;
+        }
 
         SortQueue();
         Flush();
@@ -68,12 +77,13 @@ namespace Space
             if (cmd.shader != lastShader)
             {
                 cmd.shader->Bind();
-                cmd.shader->SetMat4("u_ViewProj", m_ViewProjectionMatrix);
+                cmd.shader->SetMat4("uViewProj", m_ViewProjectionMatrix);
                 lastShader = cmd.shader;
             }
 
             //cmd.material->Bind();
-            cmd.shader->SetMat4("u_Transform", cmd.transform);
+            cmd.shader->SetMat4("uTransform", cmd.transform);
+            cmd.shader->SetVec4("uCol", cmd.color);
 
             cmd.vertexArray->Bind();
             m_GraphicsAPI->DrawIndexed(cmd.vertexArray);

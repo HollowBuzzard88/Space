@@ -1,23 +1,37 @@
 #include "SP_pch.h"
 #include "Platform/Windows/WindowsWindow.h"
 
+#include <glad/glad.h>
+
 #include <windowsx.h>
 #include "KHR/wglext.h"
 
+#include <WinUser.h>
+
 #include "Space/Events/ApplicationEvent.h"
+#include "Space/Events/KeyEvent.h"
 #include "Space/Events/MouseEvent.h"
 
-#include "Space/Core/MouseCodes.h"
 #include "Space/Core/Application.h"
 
 #include "Space/Rendering/Renderer.h"
 
 namespace Space
 {
+    glm::vec2 WindowsWindow::wndMousePos(0.0f, 0.0f);
+
+    bool WindowsWindow::keyboard[(uint8_t)Key::COUNT];
+    bool WindowsWindow::keyboardLast[(uint8_t)Key::COUNT];
+
+    std::queue<char> WindowsWindow::keyboardCharQueue;
+
+    bool WindowsWindow::mouse[(uint8_t)MouseButtons::COUNT];
+    bool WindowsWindow::mouseLast[(uint8_t)MouseButtons::COUNT];
+
     HDC WindowsWindow::m_DeviceContext;
-    std::pair<float, float> WindowsWindow::wndMousePos(0.0f, 0.0f);
     WindowsWindow::WindowData WindowsWindow::m_Data = {};
-    bool WindowsWindow::wndMouseButtons[5];
+    Cursor WindowsWindow::m_CurrentCursor = Cursor::Arrow;
+    WindowsWindow* WindowsWindow::s_Instance = nullptr;
     bool WindowsWindow::m_ShouldClose = false;
     bool WindowsWindow::m_GLInitialized = false;
 
@@ -28,6 +42,8 @@ namespace Space
 
     WindowsWindow::WindowsWindow(const WindowProps &props)
     {
+        s_Instance = this;
+
         Init(props);
     }
 
@@ -88,6 +104,9 @@ namespace Space
 
                 if (width == 0 || height == 0)
                     return 0;
+                
+                WindowsWindow::m_Data.Width = width;
+                WindowsWindow::m_Data.Height = height;
 
                 // Update the viewport OpenGL uses
                 if (m_GLInitialized)
@@ -109,16 +128,63 @@ namespace Space
                 int xPos = GET_X_LPARAM(lParam);
                 int yPos = GET_Y_LPARAM(lParam);
 
-                WindowsWindow::wndMousePos = std::pair<float, float>(xPos, yPos);
+                WindowsWindow::wndMousePos = glm::vec2(xPos, -yPos + WindowsWindow::m_Data.Height);
 
-
-                MouseMovedEvent e(xPos, yPos);
+                MouseMovedEvent e(wndMousePos.x, wndMousePos.y);
 
                 if (WindowsWindow::m_Data.EventCallback)
                 {
                     WindowsWindow::m_Data.EventCallback(e);
                 }
 
+                return 0;
+            }
+
+            case WM_SETCURSOR:
+            {
+                // Only override cursor inside the client area (window)
+                if (LOWORD(lParam) == HTCLIENT)
+                {
+                    WindowsWindow::Get()->SetWindowCursor(m_CurrentCursor);
+                    return TRUE;
+                }
+                return FALSE;
+            }
+
+            case WM_KILLFOCUS:
+            {
+                memset(keyboard, 0, sizeof(keyboard));
+                memset(mouse, 0, sizeof(mouse));
+                return 0;
+            }
+
+            case WM_KEYUP:
+            {
+                Key key = VKToKeyCode((uint8_t)wParam);
+                if (key != Key::UNKNOWN) keyboard[(uint8_t)key] = false;
+
+                KeyReleasedEvent e((uint8_t)key);
+                if (WindowsWindow::m_Data.EventCallback)
+                    WindowsWindow::m_Data.EventCallback(e);
+
+                return 0;
+            }
+
+            case WM_KEYDOWN:
+            {
+                Key key = VKToKeyCode((uint8_t)wParam);
+                if (key != Key::UNKNOWN) keyboard[(uint8_t)key] = true;
+                
+                KeyPressedEvent e((uint8_t)VKToKeyCode(wParam), LOWORD(lParam));
+                if (WindowsWindow::m_Data.EventCallback)
+                    WindowsWindow::m_Data.EventCallback(e);
+
+                return 0;
+            }
+
+            case WM_CHAR:
+            {
+                keyboardCharQueue.push((char)wParam);
                 return 0;
             }
 
@@ -133,7 +199,7 @@ namespace Space
                     MouseButtonPressedEvent e(buttonIndex);
                     WindowsWindow::m_Data.EventCallback(e);
 
-                    wndMouseButtons[buttonIndex] = true;
+                    mouse[buttonIndex] = true;
                 }
                 else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON2)    // 5th mouse button
                 {
@@ -142,10 +208,10 @@ namespace Space
                     MouseButtonPressedEvent e(buttonIndex);
                     WindowsWindow::m_Data.EventCallback(e);
 
-                    wndMouseButtons[buttonIndex] = true;
+                    mouse[buttonIndex] = true;
                 }
                 else
-                    //TODO: Throw Error
+                    SP_CORE_ERROR("Unhandled Mouse button!");
                 
 
                 return true;
@@ -159,7 +225,7 @@ namespace Space
                     MouseButtonPressedEvent e(buttonIndex);
                     WindowsWindow::m_Data.EventCallback(e);
 
-                    wndMouseButtons[buttonIndex] = false;
+                    mouse[buttonIndex] = false;
                 }
                 else if (GET_XBUTTON_WPARAM(wParam) == XBUTTON2)    // 5th mouse button
                 {
@@ -168,10 +234,10 @@ namespace Space
                     MouseButtonPressedEvent e(buttonIndex);
                     WindowsWindow::m_Data.EventCallback(e);
 
-                    wndMouseButtons[buttonIndex] = false;
+                    mouse[buttonIndex] = false;
                 }
                 else
-                    //TODO: Throw Error
+                    SP_CORE_ERROR("Unhandled Mouse button!");
                 
 
                 return true;
@@ -187,7 +253,7 @@ namespace Space
                 MouseButtonPressedEvent e(buttonIndex);
                 WindowsWindow::m_Data.EventCallback(e);
 
-                wndMouseButtons[buttonIndex] = true;
+                mouse[buttonIndex] = true;
                 return 0;
             }
             case WM_LBUTTONUP:
@@ -197,7 +263,7 @@ namespace Space
                 MouseButtonPressedEvent e(buttonIndex);
                 WindowsWindow::m_Data.EventCallback(e);
 
-                wndMouseButtons[buttonIndex] = false;
+                mouse[buttonIndex] = false;
                 return 0;
             }
             }
@@ -211,7 +277,7 @@ namespace Space
                 MouseButtonPressedEvent e(buttonIndex);
                 WindowsWindow::m_Data.EventCallback(e);
 
-                wndMouseButtons[buttonIndex] = true;
+                mouse[buttonIndex] = true;
                 return 0;
             }
             case WM_RBUTTONUP:
@@ -221,7 +287,7 @@ namespace Space
                 MouseButtonPressedEvent e(buttonIndex);
                 WindowsWindow::m_Data.EventCallback(e);
 
-                wndMouseButtons[buttonIndex] = false;
+                mouse[buttonIndex] = false;
                 return 0;
             }
             }
@@ -468,8 +534,10 @@ namespace Space
 
     void WindowsWindow::OnUpdate()
     {
-        MSG msg;
+        memcpy(keyboardLast, keyboard, sizeof(keyboard));
+        memcpy(mouseLast, mouse, sizeof(mouse));
 
+        MSG msg;
         while (PeekMessageA(&msg, m_Window, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
@@ -477,6 +545,40 @@ namespace Space
         }
 
         SwapBuffers(m_DeviceContext);
+    }
+
+    LPWSTR CursorTypeToWindowsCursor(Cursor type)
+    {
+        switch (type)
+        {
+            case Cursor::Default:           return (LPWSTR)IDC_ARROW;
+            case Cursor::Arrow:             return (LPWSTR)IDC_ARROW;
+            case Cursor::AppStarting:       return (LPWSTR)IDC_APPSTARTING;
+            case Cursor::Cross:             return (LPWSTR)IDC_CROSS;
+            case Cursor::Hand:              return (LPWSTR)IDC_HAND;
+            case Cursor::HelpSelect:        return (LPWSTR)IDC_HELP;
+            case Cursor::LocationSelect:    return (LPWSTR)IDC_PIN;
+            case Cursor::Busy:              return (LPWSTR)IDC_WAIT;
+            case Cursor::Unavailable:       return (LPWSTR)IDC_NO;
+            case Cursor::PersonSelect:      return (LPWSTR)IDC_PERSON;
+            case Cursor::Move:              return (LPWSTR)IDC_SIZEALL;
+            case Cursor::SizeDiagRight:     return (LPWSTR)IDC_SIZENESW;
+            case Cursor::SizeVert:          return (LPWSTR)IDC_SIZENS;
+            case Cursor::SizeDiagLeft:      return (LPWSTR)IDC_SIZENWSE;
+            case Cursor::SizeHoriz:         return (LPWSTR)IDC_SIZEWE;
+            case Cursor::Text:              return (LPWSTR)IDC_IBEAM;
+            case Cursor::UpArrow:           return (LPWSTR)IDC_UPARROW;
+        }
+
+        SP_CORE_ERROR("Unknown cursor type!");
+        return 0;
+    }
+
+    void WindowsWindow::SetWindowCursor(Cursor cursor)
+    {
+        m_CurrentCursor = cursor;
+
+        SetCursor(LoadCursorA(NULL, ((LPSTR)((ULONG_PTR)((WORD)CursorTypeToWindowsCursor(cursor))))));
     }
 
     void WindowsWindow::SetVSync(bool enabled)

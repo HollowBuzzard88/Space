@@ -15,5 +15,6 @@ namespace Space
         Shader* shader;
         //Material* material;
         glm::mat4 transform;
+        glm::vec4 color;
     };
 }

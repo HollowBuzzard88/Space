@@ -9,6 +9,8 @@ namespace Space
         MIDDLE =    3,
 
         BUTTON_4 =  4,
-        BUTTON_5 =  5
+        BUTTON_5 =  5,
+
+        COUNT
     };
 }

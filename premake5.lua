@@ -18,6 +18,7 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 IncludeDir = {}
 IncludeDir["Glad"] = "Space/vendor/Glad/include"
 IncludeDir["glm"] = "Space/vendor/glm"
+IncludeDir["stb"] = "Space/vendor/stb/include"
 
 include "Space/vendor/Glad"
 
@@ -42,7 +43,8 @@ project "Space"
     {
         "%{prj.name}/Source",
         "%{IncludeDir.Glad}",
-        "%{IncludeDir.glm}"
+        "%{IncludeDir.glm}",
+        "%{IncludeDir.stb}"
     }
 
     links

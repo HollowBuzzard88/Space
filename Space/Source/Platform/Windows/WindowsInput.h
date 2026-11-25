@@ -9,11 +9,15 @@ namespace Space
     class WindowsInput : public Input
     {
     protected:
-        virtual bool IsKeyPressedImpl(int keycode) override;
+        virtual bool IsKeyDownImpl(Key keycode) override;
+        virtual bool IsKeyHeldImpl(Key keycode) override;
+        virtual bool IsKeyUpImpl(Key keycode) override;
 
-        virtual bool IsMouseButtonPressedImpl(int button) override;
-        virtual std::pair<float, float> GetMousePosImpl() override;
+        virtual bool IsMouseButtonPressedImpl(MouseButtons button) override;
+        virtual glm::vec2 GetMousePosImpl() override;
         virtual float GetMouseXImpl() override;
         virtual float GetMouseYImpl() override;
+
+        virtual char GetLastCharImpl() override;
     };
 }
