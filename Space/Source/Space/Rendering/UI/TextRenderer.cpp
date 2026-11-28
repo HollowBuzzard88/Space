@@ -1,5 +1,5 @@
 #include "SP_pch.h"
-#include "Space/Rendering/TextRenderer.h"
+#include "Space/Rendering/UI/TextRenderer.h"
 
 #include <glad/glad.h>
 

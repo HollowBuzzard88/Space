@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Space/Rendering/Renderer.h"
-#include "Space/Rendering/TextRenderer.h"
+#include "Space/Rendering/UI/TextRenderer.h"
 
 #include "Space/UI/Widgets.h"
 

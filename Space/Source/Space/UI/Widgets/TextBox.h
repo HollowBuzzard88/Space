@@ -5,6 +5,8 @@
 
 #include "Space/Core/Input.h"
 
+#include "Space/Commands/CommandHandler.h"
+
 namespace Space
 {
     constexpr float PADDING = 8.0f;
@@ -41,7 +43,17 @@ namespace Space
         {
             if (m_Text.empty()) return;
 
-            CL_INFO("Chat: {0}", m_Text);
+            // Command logic
+            if (m_Text[0] == '/')
+            {
+                // Create a string with everything behind the first character ('/')
+                std::string command = m_Text.substr(1);
+                CommandHandler::Execute(command);
+            }
+            else
+            {
+                CL_INFO("Chat: {0}", m_Text);
+            }
             m_Text.clear();
         }
         

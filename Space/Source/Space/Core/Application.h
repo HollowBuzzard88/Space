@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Space/Core/Core.h"
-
 #include "Space/Core/Window.h"
 
 #include "Space/Events/Event.h"
@@ -25,6 +23,8 @@ namespace Space
 
         inline static Application& Get() { return *s_Instance; }
         inline Window& GetWindow() { return *m_Window; }
+
+        inline void Shutdown() { m_Running = false; }
     private:
         bool OnWindowClose(WindowCloseEvent& e);
         bool OnWindowResize(WindowResizeEvent& e);

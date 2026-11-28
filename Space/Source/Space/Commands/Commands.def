@@ -1,0 +1,2 @@
+// Format: COMMAND(EnumName, "console_string", "Description")
+COMMAND(Kill, "kill", "Ends the process")

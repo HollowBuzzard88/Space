@@ -12,7 +12,11 @@ namespace Space
 {
     std::string FormatMessage(const Message& message)
     {
-        return std::format("[{} - {}] {}", message.Time, message.Source == MessageSource::CLIENT ? "CLIENT" : "SERVER", message.Message);
+        std::chrono::sys_seconds timePoint{std::chrono::seconds{message.Time}};
+        auto localTP = std::chrono::zoned_seconds{std::chrono::current_zone(), timePoint};
+        std::string time = std::format("{:%H:%M:%S}", localTP);
+
+        return std::format("[{} - {}] {}", time, message.Source == MessageSource::CLIENT ? "CLIENT" : "SERVER", message.Message);
     }
 
     LogRenderer::LogRenderer()

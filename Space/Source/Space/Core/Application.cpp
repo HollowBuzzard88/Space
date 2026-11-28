@@ -3,6 +3,8 @@
 
 #include "Space/Rendering/UI/UIRenderer.h"
 
+#include "Space/Commands/CommandHandler.h"
+
 // Include Entrypoint so that C++ recognizes it
 #include "Entrypoint.h"
 
@@ -37,6 +39,7 @@ namespace Space
 
     void Application::Run()
     {
+        CommandHandler::Init();
         m_Renderer->Init();
         m_UIRenderer->Init(m_Renderer);
 

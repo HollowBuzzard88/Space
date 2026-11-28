@@ -41,7 +41,7 @@ namespace Space
             std::string formatted = FormatMessage(message, args...);
             msg.Message = std::move(formatted);
             msg.Source = source;
-            msg.Time = (uint32_t)secs.count();
+            msg.Time = secs.count();
             msg.Type = type;
 
             m_MessageHistory.push_back(msg);

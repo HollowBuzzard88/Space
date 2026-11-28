@@ -13,7 +13,7 @@ namespace Space
         float minWidth = UIrenderer->GetTextRenderer()->MeasureText("Type a message or /command");
         if (m_Size.x < minWidth) m_Size.x = minWidth + PADDING * 2.0f;
 
-        m_Transform = glm::translate(glm::mat4(1.0f), glm::vec3(m_Position + m_Size / 2.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(m_Size, 1.0f));
+        m_Transform = glm::translate(glm::mat4(1.0f), glm::vec3(m_Position + m_Size * 0.5f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(m_Size, 1.0f));
         m_Rect = Rect(m_Position, m_Size);
 
         m_Hovered = m_Rect.IsInside(Input::GetMousePos());
@@ -54,7 +54,7 @@ namespace Space
         {
             float textWidth = UIrenderer->GetTextRenderer()->MeasureText(visible);
             glm::vec2 caretSize = glm::vec2(caretWidth, UIrenderer->GetTextRenderer()->GetLineHeight() * 0.8f);
-            glm::vec2 caretPos = glm::vec2(textLeft + textWidth + 1.0f, m_Position.y);
+            glm::vec2 caretPos = glm::vec2(textLeft + textWidth + 1.0f, baseLine - caretSize.y * 0.25f);
 
             UIrenderer->DrawQuad(caretPos, caretSize, Color::UI_DARK_TEXT);
         }

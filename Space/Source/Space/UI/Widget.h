@@ -21,7 +21,7 @@ namespace Space
         explicit Widget(const glm::vec2& position, const glm::vec2& size, const Color color)
             : m_Position(position), m_Size(size), m_Color(color)
         {
-            m_Transform = glm::translate(glm::mat4(1.0f), glm::vec3(m_Position + m_Size / 2.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(m_Size, 1.0f));
+            m_Transform = glm::translate(glm::mat4(1.0f), glm::vec3(m_Position + m_Size * 0.5f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(m_Size, 1.0f));
         }
 
         virtual ~Widget() = default;

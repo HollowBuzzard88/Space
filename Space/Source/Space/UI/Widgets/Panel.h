@@ -34,7 +34,7 @@ namespace Space
 
         virtual void EarlyUpdate(std::shared_ptr<UIRenderer> UIrenderer, std::shared_ptr<Renderer> renderer) override
         {
-            m_Transform = glm::translate(glm::mat4(1.0f), glm::vec3(m_Position + m_Size / 2.0f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(m_Size, 1.0f));
+            m_Transform = glm::translate(glm::mat4(1.0f), glm::vec3(m_Position + m_Size * 0.5f, 0.0f)) * glm::scale(glm::mat4(1.0f), glm::vec3(m_Size, 1.0f));
         }
 
         virtual void LateUpdate(std::shared_ptr<UIRenderer> UIrenderer, std::shared_ptr<Renderer> renderer) override
