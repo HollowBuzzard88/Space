@@ -13,17 +13,25 @@ namespace Space
 
     void Renderer::BeginScene(const glm::mat4& viewProjectionMatrix)
     {
+        if (begunScene)
+        {
+            SP_CORE_WARN("Can't begin a scene before the last one is finished.");
+            return;
+        }
+
         m_ViewProjectionMatrix = viewProjectionMatrix;
         m_DrawQueue.clear();
+        m_GraphicsAPI->SetClearColor({0.92f, 0.25f, 0.2f, 1.0f});
+        m_GraphicsAPI->Clear();
 
         begunScene = true;
     }
 
-    void Renderer::Submit(std::shared_ptr<Shader>& shader, std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform, const glm::vec4& color)
+    void Renderer::Submit(const std::shared_ptr<Shader>& shader, const std::shared_ptr<VertexArray>& vertexArray, const glm::mat4& transform, const glm::vec4& color)
     {
         if (!begunScene)
         {
-            SP_ERROR("Unable to submit render call before 'BeginScene()' has been called.");
+            SP_CORE_ERROR("Unable to submit render call before 'BeginScene()' has been called.");
             return;
         }
 
@@ -44,7 +52,7 @@ namespace Space
     {
         if (!begunScene)
         {
-            SP_ERROR("Unable to 'EndScene()' before 'BeginScene()' has been called.");
+            SP_CORE_ERROR("Unable to 'EndScene()' before 'BeginScene()' has been called.");
             return;
         }
 
@@ -66,9 +74,6 @@ namespace Space
 
     void Renderer::Flush()
     {
-        m_GraphicsAPI->SetClearColor({0.92f, 0.25f, 0.2f, 1.0f});
-        m_GraphicsAPI->Clear();
-
         Shader* lastShader = nullptr;
 
         for (const auto& cmd : m_DrawQueue)
@@ -88,6 +93,7 @@ namespace Space
             cmd.vertexArray->Bind();
             m_GraphicsAPI->DrawIndexed(cmd.vertexArray);
         }
+        m_DrawQueue.clear();
     }
 
     void Renderer::OnWindowResize(uint32_t width, uint32_t height)

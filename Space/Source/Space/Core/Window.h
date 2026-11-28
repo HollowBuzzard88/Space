@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Space/Core/Core.h"
 #include "Space/Events/Event.h"
 
 namespace Space

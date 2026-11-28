@@ -16,6 +16,11 @@
 
 namespace Space
 {
+    std::shared_ptr<TextRenderer> TextRenderer::Create()
+    {
+        return std::make_shared<TextRenderer>();
+    }
+
     TextRenderer::~TextRenderer()
     {
         if (m_Texture) glDeleteTextures(1, &m_Texture);
@@ -55,8 +60,8 @@ namespace Space
         int ascent, descent, lineGap;
         stbtt_GetFontVMetrics(&info, &ascent, &descent, &lineGap);
 
-        m_Ascent = ascent * size;
-        m_Descent = descent * size;
+        m_Ascent = ascent * scale;
+        m_Descent = descent * scale;
         m_LineHeight = (ascent - descent + lineGap) * scale;
 
         // -------------------- Bake the glyphs into an atlas -------------------- //
@@ -121,13 +126,18 @@ namespace Space
         glEnableVertexAttribArray(1);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (const void*)offsetof(Vertex, u));
 
-        uint32_t indices[6] =
+
+        std::vector<uint32_t> indices(MAX_GLYPHS * 6);
+        for (uint32_t i = 0; i < MAX_GLYPHS; i++)
         {
-            0, 1, 2,
-            2, 3, 0
-        };
-        std::shared_ptr<IndexBuffer> m_IB = IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t));
-        m_VA->SetIndexBuffer(m_IB);
+            uint32_t o = i * 4;
+            uint32_t* p = &indices[i * 6];
+
+            p[0] = o;     p[1] = o + 1; p[2] = o + 2;
+            p[3] = o + 2; p[4] = o + 3; p[5] = o;
+        }
+        std::shared_ptr<IndexBuffer> IB = IndexBuffer::Create(indices.data(), (uint32_t)indices.size());
+        m_VA->SetIndexBuffer(IB);
 
         glBindVertexArray((GLuint)prevVAO);
 
@@ -208,16 +218,19 @@ namespace Space
             return;
         
         // -------------------- Build one quad (2 triangles) per glyph -------------------- //
+        const size_t textSize = text.size();
+        const size_t glyphCount = std::min(textSize, MAX_GLYPHS);
+
         std::vector<Vertex> vertices;
-        vertices.reserve(text.size() * 4);
+        vertices.reserve(glyphCount * 4);
 
         float penX = std::floor(baselinePos.x);
         float baseY = std::floor(baselinePos.y);
         const float inv = 1.0f / (float)ATLAS_SIZE;
 
-        for (unsigned char c : text)
+        for (size_t i = 0; i < glyphCount; i++)
         {
-            const Glyph& g = GetGlyph(c);
+            const Glyph& g = GetGlyph((unsigned char)text[i]);
 
             float x0 = penX + g.xOff;
             float x1 = x0 + (g.x1 - g.x0);
@@ -264,7 +277,7 @@ namespace Space
         glBindBuffer(GL_ARRAY_BUFFER, m_VB);
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_DYNAMIC_DRAW);
 
-        glDrawElements(GL_TRIANGLES, 0, (GLsizei)vertices.size(), nullptr);
+        glDrawElements(GL_TRIANGLES, (GLsizei)(glyphCount * 6), GL_UNSIGNED_INT, nullptr);
 
         // -------------------- Restore -------------------- //
         glBindTexture(GL_TEXTURE_2D, (GLuint)prevTexture);

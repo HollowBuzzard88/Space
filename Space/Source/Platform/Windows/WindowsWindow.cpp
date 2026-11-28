@@ -14,19 +14,17 @@
 
 #include "Space/Core/Application.h"
 
-#include "Space/Rendering/Renderer.h"
-
 namespace Space
 {
     glm::vec2 WindowsWindow::wndMousePos(0.0f, 0.0f);
 
-    bool WindowsWindow::keyboard[(uint8_t)Key::COUNT];
-    bool WindowsWindow::keyboardLast[(uint8_t)Key::COUNT];
+    bool WindowsWindow::keyboard[(size_t)Key::COUNT];
+    bool WindowsWindow::keyboardLast[(size_t)Key::COUNT];
 
     std::queue<char> WindowsWindow::keyboardCharQueue;
 
-    bool WindowsWindow::mouse[(uint8_t)MouseButtons::COUNT];
-    bool WindowsWindow::mouseLast[(uint8_t)MouseButtons::COUNT];
+    bool WindowsWindow::mouse[(size_t)MouseButtons::COUNT];
+    bool WindowsWindow::mouseLast[(size_t)MouseButtons::COUNT];
 
     HDC WindowsWindow::m_DeviceContext;
     WindowsWindow::WindowData WindowsWindow::m_Data = {};
@@ -128,7 +126,7 @@ namespace Space
                 int xPos = GET_X_LPARAM(lParam);
                 int yPos = GET_Y_LPARAM(lParam);
 
-                WindowsWindow::wndMousePos = glm::vec2(xPos, -yPos + WindowsWindow::m_Data.Height);
+                WindowsWindow::wndMousePos = glm::vec2(xPos, WindowsWindow::m_Data.Height - yPos);
 
                 MouseMovedEvent e(wndMousePos.x, wndMousePos.y);
 
@@ -160,10 +158,10 @@ namespace Space
 
             case WM_KEYUP:
             {
-                Key key = VKToKeyCode((uint8_t)wParam);
-                if (key != Key::UNKNOWN) keyboard[(uint8_t)key] = false;
+                Key key = VKToKeyCode((size_t)wParam);
+                if (key != Key::UNKNOWN) keyboard[(size_t)key] = false;
 
-                KeyReleasedEvent e((uint8_t)key);
+                KeyReleasedEvent e((size_t)key);
                 if (WindowsWindow::m_Data.EventCallback)
                     WindowsWindow::m_Data.EventCallback(e);
 
@@ -172,10 +170,10 @@ namespace Space
 
             case WM_KEYDOWN:
             {
-                Key key = VKToKeyCode((uint8_t)wParam);
-                if (key != Key::UNKNOWN) keyboard[(uint8_t)key] = true;
+                Key key = VKToKeyCode((size_t)wParam);
+                if (key != Key::UNKNOWN) keyboard[(size_t)key] = true;
                 
-                KeyPressedEvent e((uint8_t)VKToKeyCode(wParam), LOWORD(lParam));
+                KeyPressedEvent e((size_t)VKToKeyCode(wParam), LOWORD(lParam));
                 if (WindowsWindow::m_Data.EventCallback)
                     WindowsWindow::m_Data.EventCallback(e);
 

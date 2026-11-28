@@ -22,6 +22,6 @@ namespace Space
         MessageSource Source : 1;
         uint32_t Time;
 
-        const char* Message;
+        std::string Message;
     };
 }

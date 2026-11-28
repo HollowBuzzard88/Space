@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Space/Rendering/VertexArray.h"
-#include <glm/glm.hpp>
 
 namespace Space
 {

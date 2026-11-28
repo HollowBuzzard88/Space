@@ -1,27 +1,29 @@
 #include "SP_pch.h"
 #include "Space/Core/Log.h"
 
-#include "Space/Scene/LogRenderer.h"
-#include "Space/Rendering/Renderer.h"
+#include "Space/Rendering/UI/LogRenderer.h"
+#include "Space/Rendering/UI/UIRenderer.h"
 
 namespace Space
 {
-    std::vector<Message> Log::m_MessageHistory;
+    std::deque<Message> Log::m_MessageHistory;
     std::shared_ptr<LogRenderer> Log::m_LogRenderer = nullptr;
-    std::shared_ptr<Renderer> Log::m_Renderer = nullptr;
 
-    void Log::Init(std::shared_ptr<Renderer> renderer)
+    void Log::Init(std::shared_ptr<UIRenderer> UIrenderer)
     {
-        m_MessageHistory = std::vector<Message>();
+        m_MessageHistory = std::deque<Message>();
 
-        m_Renderer = renderer;
-        m_MessageHistory.reserve(MAX_MESSAGES);
         m_LogRenderer = std::make_shared<LogRenderer>();
-        m_LogRenderer->Init(renderer);
+        m_LogRenderer->Init(UIrenderer);
     }
 
     void Log::RenderLogger()
     {
-        m_LogRenderer->DrawLog(m_MessageHistory);
+        m_LogRenderer->Render();
+    }
+
+    void Log::OnWindowResize(const glm::vec2 &windowSize)
+    {
+        m_LogRenderer->OnWindowResize(windowSize);
     }
 }

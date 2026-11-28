@@ -2,7 +2,6 @@
 
 #include "Space/Core/MouseCodes.h"
 #include "Space/Core/KeyCodes.h"
-#include <glm/glm.hpp>
 
 namespace Space
 {

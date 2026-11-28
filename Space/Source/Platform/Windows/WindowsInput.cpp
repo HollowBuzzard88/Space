@@ -121,7 +121,6 @@ namespace Space
             case Key::ALT:              return VK_MENU;
         }
 
-        SP_CORE_ERROR("Invalid Keycode: {0}", (uint16_t)keycode);
         return -1;
     }
     Key VKToKeyCode(uint8_t keycode)
@@ -239,7 +238,6 @@ namespace Space
             case VK_MENU:               return Key::ALT;
         }
 
-        SP_CORE_ERROR("Invalid Keycode: {0}", (uint16_t)keycode);
         return Key::UNKNOWN;
     }
 
@@ -247,7 +245,7 @@ namespace Space
     {
         if (keycode == Key::ANY_CHAR)
         {
-            for (uint16_t i = (uint16_t)Key::FIRST_CHAR; i < (uint16_t)Key::LAST_CHAR; i++)
+            for (uint16_t i = (size_t)Key::FIRST_CHAR; i < (size_t)Key::LAST_CHAR; i++)
             {
                 if (WindowsWindow::keyboard[i] && !WindowsWindow::keyboardLast[i]) return true;
             }
@@ -255,13 +253,13 @@ namespace Space
             return false;
         }
 
-        return WindowsWindow::keyboard[(uint16_t)keycode] && !WindowsWindow::keyboardLast[(uint16_t)keycode];
+        return WindowsWindow::keyboard[(size_t)keycode] && !WindowsWindow::keyboardLast[(size_t)keycode];
     }
     bool WindowsInput::IsKeyHeldImpl(Key keycode)
     {
         if (keycode == Key::ANY_CHAR)
         {
-            for (uint16_t i = (uint16_t)Key::FIRST_CHAR; i < (uint16_t)Key::LAST_CHAR; i++)
+            for (uint16_t i = (size_t)Key::FIRST_CHAR; i < (size_t)Key::LAST_CHAR; i++)
             {
                 if (WindowsWindow::keyboard[i] && WindowsWindow::keyboardLast[i]) return true;
             }
@@ -269,13 +267,13 @@ namespace Space
             return false;
         }
 
-        return WindowsWindow::keyboard[(uint16_t)keycode] && WindowsWindow::keyboardLast[(uint16_t)keycode] ;
+        return WindowsWindow::keyboard[(size_t)keycode] && WindowsWindow::keyboardLast[(size_t)keycode] ;
     }
     bool WindowsInput::IsKeyUpImpl(Key keycode)
     {
         if (keycode == Key::ANY_CHAR)
         {
-            for (uint16_t i = (uint16_t)Key::FIRST_CHAR; i < (uint16_t)Key::LAST_CHAR; i++)
+            for (uint16_t i = (size_t)Key::FIRST_CHAR; i < (size_t)Key::LAST_CHAR; i++)
             {
                 if (!WindowsWindow::keyboard[i]) return true;
             }
@@ -283,7 +281,7 @@ namespace Space
             return false;
         }
 
-        return !WindowsWindow::keyboard[(uint16_t)keycode];
+        return !WindowsWindow::keyboard[(size_t)keycode];
     }
 
     bool WindowsInput::IsMouseButtonPressedImpl(MouseButtons button)

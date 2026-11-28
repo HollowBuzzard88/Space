@@ -3,18 +3,11 @@
 #ifdef SP_PLATFORM_WINDOWS
     #define WIN32_LEAN_AND_MEAN
     #define NOMINMAX
-    
-    #pragma push_macro("SP_ERROR")
-    #undef SP_ERROR
-    
-    #include <windows.h>
 
-    #pragma pop_macro("SP_ERROR")
+    #include <windows.h>
 #endif
 
 #include "Space/Core/Window.h"
-
-#include <glm/glm.hpp>
 
 #include "Space/Core/KeyCodes.h"
 #include "Space/Core/MouseCodes.h"
@@ -48,13 +41,13 @@ namespace Space
     protected:
         static glm::vec2 wndMousePos;
 
-        static bool keyboard[(uint8_t)Key::COUNT];
-        static bool keyboardLast[(uint8_t)Key::COUNT];
+        static bool keyboard[(size_t)Key::COUNT];
+        static bool keyboardLast[(size_t)Key::COUNT];
 
         static std::queue<char> keyboardCharQueue;
 
-        static bool mouse[(uint8_t)MouseButtons::COUNT];
-        static bool mouseLast[(uint8_t)MouseButtons::COUNT];
+        static bool mouse[(size_t)MouseButtons::COUNT];
+        static bool mouseLast[(size_t)MouseButtons::COUNT];
     private:
         virtual void Init(const WindowProps& props);
         virtual void Shutdown();

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
 class VertexArray;
 class Shader;
 //class Material;

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <glm/glm.hpp>
-
 #include <array>
 #include <cstdint>
 
@@ -36,6 +34,8 @@ namespace Space
         float GetDescent() const { return m_Descent; }  // negative, below baseline
 
         bool IsReady() const { return m_Shader && m_Shader->GetID() != 0 && m_Texture != 0; }
+
+        static std::shared_ptr<TextRenderer> Create();
     private:
         struct Glyph
         {
@@ -52,6 +52,7 @@ namespace Space
         static constexpr int FIRST_CHAR = 32;
         static constexpr int CHAR_COUNT = 95;
         static constexpr int ATLAS_SIZE = 512;
+        static constexpr size_t MAX_GLYPHS = 4096;
 
         const Glyph& GetGlyph(unsigned char c) const;
 
